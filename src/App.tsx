@@ -14,6 +14,68 @@ function App() {
     benefits: 'Acesso vitalício\nSuporte 24/7\nAtualizações constantes'
   });
 
+  const [apiKey, setApiKey] = useState('');
+  const [isGeneratingIA, setIsGeneratingIA] = useState(false);
+
+  // Carregar a apiKey do localStorage ao iniciar
+  useState(() => {
+    const savedKey = typeof window !== 'undefined' ? localStorage.getItem('openai_api_key') : '';
+    if (savedKey) {
+      setApiKey(savedKey);
+    }
+  });
+
+  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const key = e.target.value;
+    setApiKey(key);
+    localStorage.setItem('openai_api_key', key);
+  }
+
+  const handleGenerateIA = async () => {
+    if (!apiKey) {
+      alert("Por favor, insira sua OpenAI API Key no campo abaixo para usar a IA.");
+      return;
+    }
+
+    const produto = prompt("Sobre o que é o seu produto? (Ex: Curso de Guitarra para Iniciantes)");
+    if (!produto) return;
+
+    setIsGeneratingIA(true);
+    try {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({ 
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: 'Você é um especialista em Landing Pages de alta conversão. Gere uma Headline matadora (curta e impactante) e uma Subheadline persuasiva.'
+            },
+            {
+              role: 'user',
+              content: `Produto: ${produto}. Responda apenas em formato JSON: {"headline": "...", "subheadline": "..."}`
+            }
+          ]
+        })
+      });
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error?.message || 'Erro na IA');
+
+      const content = JSON.parse(json.choices[0].message.content);
+      setData(prev => ({ ...prev, ...content }));
+      alert("IA gerou sua Headline e Subheadline com sucesso!");
+    } catch (err: any) {
+      alert("Erro ao gerar com IA: " + err.message);
+    } finally {
+      setIsGeneratingIA(false);
+    }
+  };
+
   const handleChange = (e: any) => setData({ ...data, [e.target.name]: e.target.value });
 
   const generateZip = async (e: React.FormEvent) => {
@@ -98,8 +160,31 @@ function App() {
 
       <div className="card">
         <form onSubmit={generateZip}>
+          <div className="form-group" style={{ background: 'rgba(168, 85, 247, 0.05)', padding: '15px', borderRadius: '12px', border: '1px dashed rgba(168, 85, 247, 0.3)', marginBottom: '20px' }}>
+            <label style={{ color: '#a855f7', fontWeight: 'bold' }}>Sua OpenAI API Key (BYOK)</label>
+            <input 
+              type="password" 
+              className="form-input" 
+              placeholder="sk-proj-..." 
+              value={apiKey} 
+              onChange={handleApiKeyChange} 
+            />
+            <p style={{ fontSize: '0.7rem', color: '#71717a', marginTop: '5px' }}>Usada apenas para gerar o texto inicial com IA. Salva localmente.</p>
+          </div>
+
           <div className="form-group">
-            <label>Headline (Sua Grande Promessa)</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <label style={{ margin: 0 }}>Headline (Sua Grande Promessa)</label>
+              <button 
+                type="button" 
+                onClick={handleGenerateIA} 
+                className="btn-ia-magic"
+                disabled={isGeneratingIA}
+                style={{ background: 'linear-gradient(90deg, #6366f1, #a855f7)', border: 'none', color: 'white', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                {isGeneratingIA ? 'Gerando...' : '✨ Gerar com IA'}
+              </button>
+            </div>
             <input type="text" name="headline" className="form-input" value={data.headline} onChange={handleChange} required />
           </div>
 
