@@ -151,14 +151,15 @@ function App() {
     }
   };
 
-  return (
-    <div className="container">
-      <div className="t-center">
-        <span className="badge">No-Code Factory</span>
-        <h1>Gerador Rápido de LPs</h1>
-      </div>
+  const benefitsList = data.benefits.split('\n').filter(b => b.trim() !== '');
 
-      <div className="card">
+  return (
+    <div className="app-container">
+      {/* Editor Lateral */}
+      <aside className="editor-sidebar">
+        <span className="badge">No-Code Editor</span>
+        <h1>Configurar LP</h1>
+
         <form onSubmit={generateZip}>
           <div className="form-group" style={{ background: 'rgba(168, 85, 247, 0.05)', padding: '15px', borderRadius: '12px', border: '1px dashed rgba(168, 85, 247, 0.3)', marginBottom: '20px' }}>
             <label style={{ color: '#a855f7', fontWeight: 'bold' }}>Sua OpenAI API Key (BYOK)</label>
@@ -169,12 +170,11 @@ function App() {
               value={apiKey} 
               onChange={handleApiKeyChange} 
             />
-            <p style={{ fontSize: '0.7rem', color: '#71717a', marginTop: '5px' }}>Usada apenas para gerar o texto inicial com IA. Salva localmente.</p>
           </div>
 
           <div className="form-group">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <label style={{ margin: 0 }}>Headline (Sua Grande Promessa)</label>
+              <label style={{ margin: 0 }}>Headline</label>
               <button 
                 type="button" 
                 onClick={handleGenerateIA} 
@@ -182,7 +182,7 @@ function App() {
                 disabled={isGeneratingIA}
                 style={{ background: 'linear-gradient(90deg, #6366f1, #a855f7)', border: 'none', color: 'white', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 'bold' }}
               >
-                {isGeneratingIA ? 'Gerando...' : '✨ Gerar com IA'}
+                {isGeneratingIA ? '...' : '✨ IA'}
               </button>
             </div>
             <input type="text" name="headline" className="form-input" value={data.headline} onChange={handleChange} required />
@@ -195,33 +195,80 @@ function App() {
 
           <div className="row">
             <div className="col form-group">
-              <label>Cor de Fundo da LP (HEX)</label>
-              <input type="color" name="bgColor" style={{width: '100%', height:'50px', padding:'5px', background:'transparent', border:'none'}} value={data.bgColor} onChange={handleChange} />
+              <label>Cor de Fundo</label>
+              <input type="color" name="bgColor" className="form-input" style={{height:'45px', padding:'2px'}} value={data.bgColor} onChange={handleChange} />
             </div>
             <div className="col form-group">
-              <label>Cor Principal (Botões e Destaques)</label>
-              <input type="color" name="primaryColor" style={{width: '100%', height:'50px', padding:'5px', background:'transparent', border:'none'}} value={data.primaryColor} onChange={handleChange} />
+              <label>Cor do Botão</label>
+              <input type="color" name="primaryColor" className="form-input" style={{height:'45px', padding:'2px'}} value={data.primaryColor} onChange={handleChange} />
             </div>
           </div>
 
           <div className="form-group">
-            <label>Link de Checkout (Hotmart / Kiwify)</label>
-            <input type="url" name="checkoutLink" className="form-input" value={data.checkoutLink} onChange={handleChange} required />
-          </div>
-
-          <div className="form-group">
-            <label>Texto do Botão CTA</label>
+            <label>Texto do Botão</label>
             <input type="text" name="btnText" className="form-input" value={data.btnText} onChange={handleChange} required />
           </div>
 
           <div className="form-group">
-            <label>O que o cliente vai receber? (Um por linha)</label>
-            <textarea name="benefits" className="form-input textarea" value={data.benefits} onChange={handleChange} style={{minHeight: '120px'}} required />
+            <label>Link de Checkout</label>
+            <input type="url" name="checkoutLink" className="form-input" value={data.checkoutLink} onChange={handleChange} required />
           </div>
 
-          <button type="submit" className="btn">⚡ Gerar & Baixar Arquivo .ZIP</button>
+          <div className="form-group">
+            <label>Benefícios (Um por linha)</label>
+            <textarea name="benefits" className="form-input textarea" value={data.benefits} onChange={handleChange} required />
+          </div>
+
+          <button type="submit" className="btn">⚡ Baixar Arquivo .ZIP</button>
         </form>
-      </div>
+      </aside>
+
+      {/* Canvas de Preview */}
+      <main className="preview-canvas">
+        <div className="preview-window">
+          {/* Mini-simulação da LP Real */}
+          <div style={{ backgroundColor: data.bgColor, minHeight: '600px', color: '#fff', padding: '60px 20px', textAlign: 'center' }}>
+            <div style={{ display: 'inline-block', background: 'rgba(255,0,0,0.1)', color: '#ff3333', border: '1px solid #ff3333', padding: '5px 15px', borderRadius: '50px', fontWeight: 700, fontSize: '0.8rem', marginBottom: '20px', textTransform: 'uppercase' }}>
+              Atenção! Oferta por Tempo Limitado
+            </div>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '20px', color: '#fff' }}>{data.headline}</h1>
+            <p style={{ fontSize: '1.1rem', color: '#a1a1aa', maxWidth: '600px', margin: '0 auto 40px' }}>{data.subheadline}</p>
+            
+            <div style={{ width: '100%', maxWidth: '500px', height: '280px', background: '#18181b', borderRadius: '12px', margin: '0 auto 40px', border: '2px dashed #27272a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#52525b' }}>
+              Vídeo de Vendas
+            </div>
+
+            <div style={{ 
+              display: 'inline-block', 
+              width: '100%', 
+              maxWidth: '500px',
+              backgroundColor: data.primaryColor, 
+              color: '#fff', 
+              padding: '20px', 
+              borderRadius: '12px', 
+              fontSize: '1.3rem', 
+              fontWeight: 900, 
+              textTransform: 'uppercase',
+              boxShadow: `0 10px 30px -10px ${data.primaryColor}`
+            }}>
+              {data.btnText}
+            </div>
+            
+            <p style={{ fontSize: '0.8rem', color: '#71717a', marginTop: '15px', marginBottom: '40px' }}>🔒 Compra 100% Segura. Acesso imediato.</p>
+
+            <div style={{ background: '#18181b', borderRadius: '16px', padding: '30px', textAlign: 'left', border: '1px solid #27272a', maxWidth: '500px', margin: '0 auto' }}>
+              <h3 style={{ textAlign: 'center', marginBottom: '20px' }}>Você vai receber:</h3>
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {benefitsList.map((b, i) => (
+                  <li key={i} style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
+                    <span style={{ color: '#10b981', marginRight: '10px' }}>✓</span> {b}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
