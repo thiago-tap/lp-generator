@@ -1,0 +1,16 @@
+{
+  "name": "No-Code Factory",
+  "short_name": "LP Gen",
+  "description": "Crie Landing Pages de alta conversão visualmente e baixe o código otimizado.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
